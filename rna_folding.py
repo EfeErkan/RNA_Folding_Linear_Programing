@@ -57,7 +57,7 @@ def RNA_Folding_MAX_PAIRS(RNA:str, distance_limit:int = 4): # Part A
     model.optimize()
     return model.objVal
 
-def RNA_Folding_MIN_Energy(RNA:str, A_U_energy:float = -1.33, G_C_ENERGY:float = -1.45, distance_limit:int = 4): # Part B
+def RNA_Folding_MIN_Energy(RNA:str, A_U_energy:float = -1.33, G_C_ENERGY:float = -1.45, distance_limit:int = 4): # Part B and C
     model = Model("RNA", env=env)
     X = tupledict()
 
@@ -88,4 +88,5 @@ def RNA_Folding_MIN_Energy(RNA:str, A_U_energy:float = -1.33, G_C_ENERGY:float =
                         model.addConstr(X[i, j] + X[k, l] <= 1)
 
     model.optimize()
-    return model.objVal
+    num_of_pairs = quicksum(X[i, j] for i in range(1, len(RNA) + 1) for j in range(i + 1, len(RNA) + 1)).getValue()
+    return model.objVal, num_of_pairs
