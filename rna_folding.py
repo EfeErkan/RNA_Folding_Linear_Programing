@@ -5,6 +5,14 @@ env = gp.Env(empty=True)
 env.setParam('OutputFlag', 0)
 env.start()
 
+STACKING_PAIRS_ENERGY = {("A-U", "A-U"):-1.1, ("A-U", "C-G"):-2.1, ("A-U", "G-C"):-2.2, ("A-U", "U-A"):-0.6,
+                         ("C-G", "A-U"):-2.1, ("C-G", "C-G"):-2.4, ("C-G", "G-C"):-3.3, ("C-G", "U-A"):-1.4,
+                         ("G-C", "A-U"):-2.2, ("G-C", "C-G"):-3.3, ("G-C", "G-C"):-3.4, ("G-C", "U-A"):-1.5,
+                         ("U-A", "A-U"):-0.6, ("U-A", "C-G"):-1.4, ("U-A", "G-C"):-1.5, ("U-A", "U-A"):-0.3}
+
+def calculate_energy_pair(RNA:str, i:int, j:int):
+    return STACKING_PAIRS_ENERGY[(f"{RNA[i]}-{RNA[j]}", f"{RNA[i + 1]}-{RNA[j - 1]}")]
+
 def isComplementary(ch1, ch2):
     if ch1 == 'A' and ch2 == 'U':
         return 1
@@ -90,3 +98,6 @@ def RNA_Folding_MIN_Energy(RNA:str, A_U_energy:float = -1.33, G_C_ENERGY:float =
     model.optimize()
     num_of_pairs = quicksum(X[i, j] for i in range(1, len(RNA) + 1) for j in range(i + 1, len(RNA) + 1)).getValue()
     return model.objVal, num_of_pairs
+
+def RNA_Folding_MIN_Stack_Energy(RNA:str, distance_limit:int = 4): # Part D
+    pass
