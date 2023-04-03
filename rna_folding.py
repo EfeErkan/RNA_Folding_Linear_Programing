@@ -116,14 +116,12 @@ def RNA_Folding_MIN_Stack_Energy(RNA:str, distance_limit:int = 4): # Part D
     # At most 1 pairing        
     for i in range(1, len(RNA) + 1):
         model.addConstr(quicksum(X[j, i] for j in range(1, i)) + quicksum(X[i, j] for j in range(i + 1, len(RNA) + 1)) <= 1)
-        model.addConstr(quicksum(Y[j, i] for j in range(1, i)) + quicksum(Y[i, j] for j in range(i + 1, len(RNA) + 1)) <= 1)
 
     # Complementary characters => A-U, G-C and distance limitation
     for i in range(1, len(RNA) + 1):
         for j in range(i + 1, len(RNA) + 1):
             if isValidPairing(RNA, i, j, distance_limit) == False:
                 model.addConstr(X[i, j] == 0)  
-                model.addConstr(Y[i, j] == 0)
 
     # No cross pairing            
     for i in range(1, len(RNA) + 1):
@@ -132,20 +130,16 @@ def RNA_Folding_MIN_Stack_Energy(RNA:str, distance_limit:int = 4): # Part D
                 for l in range(j + 1, len(RNA) + 1):
                     if isValidPairing(RNA, i, j, distance_limit) and isValidPairing(RNA, k, l, distance_limit):
                         model.addConstr(X[i, j] + X[k, l] <= 1)
-                        model.addConstr(Y[i, j] + Y[k, l] <= 1)
     
-    # Stacked pairs check
+    # Stacked pairs check 1
     for i in range(1, len(RNA) + 1):
         for j in range(i + 1, len(RNA) + 1):
-            if isValidPairing(RNA, i, j, distance_limit) and isValidPairing(RNA, i + 1, j - 1, distance_limit):
-                model.addConstr(quicksum(X[i, j] + X[i + 1, j - 1] - Y[i, j]) <= 1)
+            model.addConstr(quicksum(X[i, j] + X[i + 1, j - 1] - Y[i, j]) <= 1)
 
-    # 
+    # Stacked pairs check 2
     for i in range(1, len(RNA) + 1):
         for j in range(i + 1, len(RNA) + 1):
-            if Y[i, j] == 1:
-                model.addConstr(quicksum(2 * Y[i, j] - X[i, j] - X[i + 1, j - 1]) <= 0)
+            model.addConstr(quicksum(2 * Y[i, j] - X[i, j] - X[i + 1, j - 1]) <= 0)
                
     model.optimize()
-    num_of_pairs = quicksum(Y[i, j] for i in range(1, len(RNA) + 1) for j in range(i + 1, len(RNA) + 1)).getValue()
-    return model.objVal, num_of_pairs
+    return model.objVal
