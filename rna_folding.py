@@ -102,16 +102,16 @@ def RNA_Folding_MIN_Energy(RNA:str, A_U_energy:float = -1.33, G_C_ENERGY:float =
 def RNA_Folding_MIN_Stack_Energy(RNA:str, distance_limit:int = 4): # Part D
     model = Model("RNA", env=env)
     X = tupledict()
-    Y = tupledict()
+    S = tupledict()
 
     # Decision variables
     for i in range(1, len(RNA) + 1):
         for j in range(i + 1, len(RNA) + 1):
             X[i, j] = model.addVar(vtype=GRB.BINARY, name=f"x{i}_{j}")
-            Y[i, j] = model.addVar(vtype=GRB.BINARY, name=f"y{i}_{j}")
+            S[i, j] = model.addVar(vtype=GRB.BINARY, name=f"y{i}_{j}")
     
     # Objective function   
-    model.setObjective(quicksum(Y[i, j] * (calculate_energy_pair(RNA, i, j) if isValidPairing(RNA, i, j, distance_limit) and isValidPairing(RNA, i + 1, j - 1, distance_limit) else 0) for i in range(1, len(RNA) + 1) for j in range(i + 1, len(RNA) + 1)), GRB.MINIMIZE)
+    model.setObjective(quicksum(S[i, j] * (calculate_energy_pair(RNA, i, j) if isValidPairing(RNA, i, j, distance_limit) and isValidPairing(RNA, i + 1, j - 1, distance_limit) else 0) for i in range(1, len(RNA) + 1) for j in range(i + 1, len(RNA) + 1)), GRB.MINIMIZE)
 
     # At most 1 pairing        
     for i in range(1, len(RNA) + 1):
@@ -134,12 +134,12 @@ def RNA_Folding_MIN_Stack_Energy(RNA:str, distance_limit:int = 4): # Part D
     # Stacked pairs check 1
     for i in range(1, len(RNA) + 1):
         for j in range(i + 1, len(RNA) + 1):
-            model.addConstr(quicksum(X[i, j] + X[i + 1, j - 1] - Y[i, j]) <= 1)
+            model.addConstr(quicksum(X[i, j] + X[i + 1, j - 1] - S[i, j]) <= 1)
 
     # Stacked pairs check 2
     for i in range(1, len(RNA) + 1):
         for j in range(i + 1, len(RNA) + 1):
-            model.addConstr(quicksum(2 * Y[i, j] - X[i, j] - X[i + 1, j - 1]) <= 0)
+            model.addConstr(quicksum(2 * S[i, j] - X[i, j] - X[i + 1, j - 1]) <= 0)
                
     model.optimize()
     return model.objVal
