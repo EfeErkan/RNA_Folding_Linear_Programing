@@ -11,7 +11,12 @@ STACKING_PAIRS_ENERGY = {("A-U", "A-U"):-1.1, ("A-U", "C-G"):-2.1, ("A-U", "G-C"
                          ("U-A", "A-U"):-0.6, ("U-A", "C-G"):-1.4, ("U-A", "G-C"):-1.5, ("U-A", "U-A"):-0.3}
 
 def calculate_energy_pair(RNA:str, i:int, j:int):
-    return STACKING_PAIRS_ENERGY[(f"{RNA[i]}-{RNA[j]}", f"{RNA[i + 1]}-{RNA[j - 1]}")]
+    first_pair = f"{RNA[i]}-{RNA[j]}"
+    second_pair = f"{RNA[i + 1]}-{RNA[j - 1]}"
+    if (first_pair, second_pair) in STACKING_PAIRS_ENERGY.keys():
+        return STACKING_PAIRS_ENERGY[(first_pair, second_pair)]
+    else:
+        return 0
 
 def isComplementary(ch1, ch2):
     if ch1 == 'A' and ch2 == 'U':
