@@ -148,3 +148,6 @@ def RNA_Folding_MIN_Stack_Energy(RNA:str, distance_limit:int = 4): # Part D
                
     model.optimize()
     return model.objVal
+
+def RNA_Folding_MIN_Stack_Energy_Pseudoknots(RNA:str, distance_limit:int = 4): # Part E
+    pass
