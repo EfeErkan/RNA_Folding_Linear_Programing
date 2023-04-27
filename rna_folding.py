@@ -191,6 +191,7 @@ def RNA_Folding_MIN_Stack_Energy_Pseudoknots(RNA:str, distance_limit:int = 4): #
     for i in range(1, len(RNA) + 1):
         for j in range(i + 1, len(RNA) + 1):
             model.addConstr(quicksum(X[i, j] + X[i + 1, j - 1] - S[i, j]) <= 1)
+            
     for i in range(1, len(RNA) + 1):
         for j in range(i + 1, len(RNA) + 1):
             model.addConstr(quicksum(2 * S[i, j] - X[i, j] - X[i + 1, j - 1]) <= 0)
@@ -199,10 +200,13 @@ def RNA_Folding_MIN_Stack_Energy_Pseudoknots(RNA:str, distance_limit:int = 4): #
     for i in range(1, len(RNA) + 1):
         for j in range(i + 1, len(RNA) + 1):
             model.addConstr(quicksum(Y[i, j] + Y[i + 1, j - 1] - Q[i, j]) <= 1)
+            
     for i in range(1, len(RNA) + 1):
         for j in range(i + 1, len(RNA) + 1):
             model.addConstr(quicksum(2 * Q[i, j] - Y[i, j] - Y[i + 1, j - 1]) <= 0)
+            
     model.optimize()
     return model.objVal
 
+def RNA_Folding_MIN_Energy_DP(RNA:str, distance_limit:int = 4): # Part F
     pass
