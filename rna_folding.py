@@ -150,4 +150,59 @@ def RNA_Folding_MIN_Stack_Energy(RNA:str, distance_limit:int = 4): # Part D
     return model.objVal
 
 def RNA_Folding_MIN_Stack_Energy_Pseudoknots(RNA:str, distance_limit:int = 4): # Part E
+    model = Model("RNA", env=env)
+    X = tupledict()
+    S = tupledict()
+    Y = tupledict()
+    Q = tupledict()
+
+    # Decision variables
+    for i in range(1, len(RNA) + 1):
+        for j in range(i + 1, len(RNA) + 1):
+            X[i, j] = model.addVar(vtype=GRB.BINARY, name=f"x{i}_{j}")
+            S[i, j] = model.addVar(vtype=GRB.BINARY, name=f"s{i}_{j}")
+            Y[i, j] = model.addVar(vtype=GRB.BINARY, name=f"y{i}_{j}")
+            Q[i, j] = model.addVar(vtype=GRB.BINARY, name=f"q{i}_{j}")
+    
+    # Objective function   
+    model.setObjective(quicksum(S[i, j] * calculate_energy_pair(RNA, i, j) + Q[i, j] * calculate_energy_pair(RNA, i, j) for i in range(1, len(RNA) + 1) for j in range(i + 1, len(RNA) + 1)), GRB.MINIMIZE)
+    
+    # At most 1 pairing        
+    for i in range(1, len(RNA) + 1):
+        model.addConstr(quicksum(X[j, i] for j in range(1, i)) + quicksum(X[i, j] for j in range(i + 1, len(RNA) + 1)) + quicksum(Y[j, i] for j in range(1, i)) + quicksum(Y[i, j] for j in range(i + 1, len(RNA) + 1)) <= 1)
+    
+    # Complementary characters => A-U, G-C and distance limitation
+    for i in range(1, len(RNA) + 1):
+        for j in range(i + 1, len(RNA) + 1):
+            if isValidPairing(RNA, i, j, distance_limit) == False:
+                model.addConstr(X[i, j] == 0)  
+                model.addConstr(Y[i, j] == 0)  
+    
+    # No cross pairing            
+    for i in range(1, len(RNA) + 1):
+        for k in range(i + 1, len(RNA) + 1):
+            for j in range(k + 1, len(RNA) + 1):
+                for l in range(j + 1, len(RNA) + 1):
+                    if isValidPairing(RNA, i, j, distance_limit) and isValidPairing(RNA, k, l, distance_limit):
+                        model.addConstr(X[i, j] + X[k, l] <= 1)
+                        model.addConstr(Y[i, j] + Y[k, l] <= 1)
+
+    # Stacked pairs check for upward pairs
+    for i in range(1, len(RNA) + 1):
+        for j in range(i + 1, len(RNA) + 1):
+            model.addConstr(quicksum(X[i, j] + X[i + 1, j - 1] - S[i, j]) <= 1)
+    for i in range(1, len(RNA) + 1):
+        for j in range(i + 1, len(RNA) + 1):
+            model.addConstr(quicksum(2 * S[i, j] - X[i, j] - X[i + 1, j - 1]) <= 0)
+
+    # Stacked pairs check for downward pairs
+    for i in range(1, len(RNA) + 1):
+        for j in range(i + 1, len(RNA) + 1):
+            model.addConstr(quicksum(Y[i, j] + Y[i + 1, j - 1] - Q[i, j]) <= 1)
+    for i in range(1, len(RNA) + 1):
+        for j in range(i + 1, len(RNA) + 1):
+            model.addConstr(quicksum(2 * Q[i, j] - Y[i, j] - Y[i + 1, j - 1]) <= 0)
+    model.optimize()
+    return model.objVal
+
     pass
