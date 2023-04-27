@@ -6,15 +6,15 @@ def main():
     
     for index, row in RNA_df.iterrows():
         RNA = row['RNA']
-        result1 = RNA_Folding_MIN_Energy(RNA, distance_limit=4)
-        result2 = RNA_Folding_MIN_Energy(RNA, distance_limit=7)
-        result3 = RNA_Folding_MIN_Stack_Energy(RNA, distance_limit=4)
-        result4 = RNA_Folding_MIN_Stack_Energy_Pseudoknots(RNA, distance_limit=4)
+        # result1 = RNA_Folding_MIN_Energy(RNA, distance_limit=4)
+        # result2 = RNA_Folding_MIN_Energy(RNA, distance_limit=7)
+        # result3 = RNA_Folding_MIN_Stack_Energy(RNA, distance_limit=4)
+        result4 = RNA_Folding_MIN_Stack_Energy_Pseudoknots(RNA)
 
-        print(f"Min Energy Group {index + 1} distance limit 4: {result1[0]}, Number of pairs: {result1[1]}")
-        print(f"Min Energy Group {index + 1} distance limit 7: {result2[0]}, Number of pairs: {result2[1]}")
-        print(f"Min Stack Energy Group {index + 1} distance limit 4: {result3[0]}, Number of pairs: {result3[1]}")
-        print(f"Min Energy Group with Pseudo-Knots {index + 1} distance limit 4: {result4[0]}, Number of pairs: {result4[1]}")
+        # print(f"Min Energy Group {index + 1} distance limit 4: {result1[0]}, Number of pairs: {result1[1]}")
+        # print(f"Min Energy Group {index + 1} distance limit 7: {result2[0]}, Number of pairs: {result2[1]}")
+        # print(f"Min Stack Energy Group {index + 1} distance limit 4: {result3}")
+        print(f"Min Energy Group with Pseudo-Knots {index + 1}: {result4}")
 
 if __name__ == '__main__':
     main()

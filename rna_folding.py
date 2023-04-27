@@ -11,8 +11,8 @@ STACKING_PAIRS_ENERGY = {("A-U", "A-U"):-1.1, ("A-U", "C-G"):-2.1, ("A-U", "G-C"
                          ("U-A", "A-U"):-0.6, ("U-A", "C-G"):-1.4, ("U-A", "G-C"):-1.5, ("U-A", "U-A"):-0.3}
 
 def calculate_energy_pair(RNA:str, i:int, j:int):
-    first_pair = f"{RNA[i]}-{RNA[j]}"
-    second_pair = f"{RNA[i + 1]}-{RNA[j - 1]}"
+    first_pair = f"{RNA[i - 1]}-{RNA[j - 1]}"
+    second_pair = f"{RNA[i]}-{RNA[j - 2]}"
     if (first_pair, second_pair) in STACKING_PAIRS_ENERGY.keys():
         return STACKING_PAIRS_ENERGY[(first_pair, second_pair)]
     else:
@@ -138,13 +138,13 @@ def RNA_Folding_MIN_Stack_Energy(RNA:str, distance_limit:int = 4): # Part D
     
     # Stacked pairs check 1
     for i in range(1, len(RNA) + 1):
-        for j in range(i + 1, len(RNA) + 1):
-            model.addConstr(quicksum(X[i, j] + X[i + 1, j - 1] - S[i, j]) <= 1)
+        for j in range(i + 3, len(RNA) + 1):
+            model.addConstr(X[i, j] + X[i + 1, j - 1] - S[i, j] <= 1)
 
     # Stacked pairs check 2
     for i in range(1, len(RNA) + 1):
-        for j in range(i + 1, len(RNA) + 1):
-            model.addConstr(quicksum(2 * S[i, j] - X[i, j] - X[i + 1, j - 1]) <= 0)
+        for j in range(i + 3, len(RNA) + 1):
+            model.addConstr(2 * S[i, j] - X[i, j] - X[i + 1, j - 1] <= 0)
                
     model.optimize()
     return model.objVal
@@ -189,21 +189,21 @@ def RNA_Folding_MIN_Stack_Energy_Pseudoknots(RNA:str, distance_limit:int = 4): #
 
     # Stacked pairs check for upward pairs
     for i in range(1, len(RNA) + 1):
-        for j in range(i + 1, len(RNA) + 1):
-            model.addConstr(quicksum(X[i, j] + X[i + 1, j - 1] - S[i, j]) <= 1)
+        for j in range(i + 3, len(RNA) + 1):
+            model.addConstr(X[i, j] + X[i + 1, j - 1] - S[i, j] <= 1)
             
     for i in range(1, len(RNA) + 1):
-        for j in range(i + 1, len(RNA) + 1):
-            model.addConstr(quicksum(2 * S[i, j] - X[i, j] - X[i + 1, j - 1]) <= 0)
+        for j in range(i + 3, len(RNA) + 1):
+            model.addConstr(2 * S[i, j] - X[i, j] - X[i + 1, j - 1] <= 0)
 
     # Stacked pairs check for downward pairs
     for i in range(1, len(RNA) + 1):
-        for j in range(i + 1, len(RNA) + 1):
-            model.addConstr(quicksum(Y[i, j] + Y[i + 1, j - 1] - Q[i, j]) <= 1)
+        for j in range(i + 3, len(RNA) + 1):
+            model.addConstr(Y[i, j] + Y[i + 1, j - 1] - Q[i, j] <= 1)
             
     for i in range(1, len(RNA) + 1):
-        for j in range(i + 1, len(RNA) + 1):
-            model.addConstr(quicksum(2 * Q[i, j] - Y[i, j] - Y[i + 1, j - 1]) <= 0)
+        for j in range(i + 3, len(RNA) + 1):
+            model.addConstr(2 * Q[i, j] - Y[i, j] - Y[i + 1, j - 1] <= 0)
             
     model.optimize()
     return model.objVal
