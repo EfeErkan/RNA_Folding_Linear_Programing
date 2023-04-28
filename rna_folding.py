@@ -36,6 +36,15 @@ def isValidPairing(RNA:str, i:int, j:int, distance_limit:int = 4):
         return False
     return True
 
+def get_energy(base1, base2):
+    # get the energy associated with forming a duplet
+    if (base1, base2) in [('A', 'U'), ('U', 'A')]:
+        return -1.33
+    elif (base1, base2) in [('G', 'C'), ('C', 'G')]:
+        return -1.45
+    else:
+        return 0
+
 def RNA_Folding_MAX_PAIRS(RNA:str, distance_limit:int = 4): # Part A
     
     model = Model("RNA", env=env)
@@ -209,4 +218,21 @@ def RNA_Folding_MIN_Stack_Energy_Pseudoknots(RNA:str, distance_limit:int = 4): #
     return model.objVal
 
 def RNA_Folding_MIN_Energy_DP(RNA:str, distance_limit:int = 4): # Part F
-    pass
+    n = len(RNA)
+    dp = [[0 for i in range(n)] for j in range(n)]
+
+    for k in range(distance_limit, n):
+        for i in range(n - k):
+            j = i + k
+            case1 = dp[i+1][j]
+            case2 = dp[i][j-1]
+            best = min(case1, case2)
+            for m in range(i+1, j):
+                case3 = dp[i][m-1] + dp[m+1][j-1]
+                if get_energy(RNA[m], RNA[j]) != 0:
+                    case3 += get_energy(RNA[m], RNA[j])
+                best = min(best, case3)
+            dp[i][j] = best
+    return dp[0][n-1]
+
+
