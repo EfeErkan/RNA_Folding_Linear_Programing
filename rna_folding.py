@@ -1,5 +1,6 @@
 from gurobipy import Model, GRB, quicksum, tupledict
 import gurobipy as gp
+import numpy as np
 
 env = gp.Env(empty=True)
 env.setParam('OutputFlag', 0)
@@ -36,7 +37,7 @@ def isValidPairing(RNA:str, i:int, j:int, distance_limit:int = 4):
         return False
     return True
 
-def get_energy(base1, base2):
+def Energy(base1, base2):
     # get the energy associated with forming a duplet
     if (base1, base2) in [('A', 'U'), ('U', 'A')]:
         return -1.33
@@ -219,18 +220,16 @@ def RNA_Folding_MIN_Stack_Energy_Pseudoknots(RNA:str, distance_limit:int = 4): #
 
 def RNA_Folding_MIN_Energy_DP(RNA:str, distance_limit:int = 4): # Part F
     n = len(RNA)
-    dp = [[0 for i in range(n)] for j in range(n)]
+    W = np.zeros((n,n))
 
     for k in range(distance_limit, n):
         for i in range(n - k):
             j = i + k
-            case1 = dp[i+1][j]
-            case2 = dp[i][j-1]
-            best = min(case1, case2)
-            for m in range(i+1, j):
-                case3 = dp[i][m-1] + dp[m+1][j-1] + get_energy(RNA[m], RNA[j])
-                best = min(best, case3)
-            dp[i][j] = best
-    return dp[0][n-1]
+            best = W[i, j - 1]
+            for t in range(i, j - distance_limit + 1):
+                case = W[i, t - 1] + Energy(RNA[t], RNA[j]) + W[t + 1, j - 1]
+                best = min(best, case)
+            W[i, j] = best
+    return W[0, n - 1]
 
 
