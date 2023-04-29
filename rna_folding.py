@@ -38,13 +38,20 @@ def isValidPairing(RNA:str, i:int, j:int, distance_limit:int = 4):
     return True
 
 def Energy(base1, base2):
-    # get the energy associated with forming a duplet
     if (base1, base2) in [('A', 'U'), ('U', 'A')]:
         return -1.33
     elif (base1, base2) in [('G', 'C'), ('C', 'G')]:
         return -1.45
     else:
         return 0
+    
+def Optimal_Solution(optimized_model, var):
+    solution = []
+    for v in optimized_model.getVars():
+        if v.VarName[0] == var and v.X == 1:
+            index = v.VarName.index("_")
+            solution.append((int(v.VarName[1:index]), int(v.VarName[index + 1:])))
+    return solution
 
 def RNA_Folding_MAX_PAIRS(RNA:str, distance_limit:int = 4): # Part A
     
@@ -78,7 +85,7 @@ def RNA_Folding_MAX_PAIRS(RNA:str, distance_limit:int = 4): # Part A
                         model.addConstr(X[i, j] + X[k, l] <= 1)
 
     model.optimize()
-    return model.objVal
+    return {"Optimal_Result":model.objVal, "Pairings":Optimal_Solution(model, 'x')}
 
 def RNA_Folding_MIN_Energy(RNA:str, A_U_energy:float = -1.33, G_C_ENERGY:float = -1.45, distance_limit:int = 4): # Part B and C
     model = Model("RNA", env=env)
@@ -111,8 +118,7 @@ def RNA_Folding_MIN_Energy(RNA:str, A_U_energy:float = -1.33, G_C_ENERGY:float =
                         model.addConstr(X[i, j] + X[k, l] <= 1)
 
     model.optimize()
-    num_of_pairs = quicksum(X[i, j] for i in range(1, len(RNA) + 1) for j in range(i + 1, len(RNA) + 1)).getValue()
-    return model.objVal, num_of_pairs
+    return {"Optimal_Result":model.objVal, "Pairings":Optimal_Solution(model, 'x')}
 
 def RNA_Folding_MIN_Stack_Energy(RNA:str, distance_limit:int = 4): # Part D
     model = Model("RNA", env=env)
@@ -157,7 +163,7 @@ def RNA_Folding_MIN_Stack_Energy(RNA:str, distance_limit:int = 4): # Part D
             model.addConstr(2 * S[i, j] - X[i, j] - X[i + 1, j - 1] <= 0)
                
     model.optimize()
-    return model.objVal
+    return {"Optimal_Result":model.objVal, "Pairings":Optimal_Solution(model, 'x')}
 
 def RNA_Folding_MIN_Stack_Energy_Pseudoknots(RNA:str, distance_limit:int = 4): # Part E
     model = Model("RNA", env=env)
@@ -216,20 +222,30 @@ def RNA_Folding_MIN_Stack_Energy_Pseudoknots(RNA:str, distance_limit:int = 4): #
             model.addConstr(2 * Q[i, j] - Y[i, j] - Y[i + 1, j - 1] <= 0)
             
     model.optimize()
-    return model.objVal
+    return {"Optimal_Result":model.objVal, "Upward_Pairings":Optimal_Solution(model, 'x'), "Downward_Pairings":Optimal_Solution(model, 'y')}
 
 def RNA_Folding_MIN_Energy_DP(RNA:str, distance_limit:int = 4): # Part F
     n = len(RNA)
     W = np.zeros((n,n))
-
+    
+    P = np.empty((n,n), dtype=object)
+    for i in range(n):
+        for j in range(n):
+            P[i,j] = []
+    
     for k in range(distance_limit, n):
         for i in range(n - k):
             j = i + k
-            best = W[i, j - 1]
+            min = W[i, j - 1]
+            P[i, j] = P[i, j - 1]
+            
             for t in range(i, j - distance_limit + 1):
                 case = W[i, t - 1] + Energy(RNA[t], RNA[j]) + W[t + 1, j - 1]
-                best = min(best, case)
-            W[i, j] = best
-    return W[0, n - 1]
+                if case < min:
+                    min = case
+                    P[i, j] = P[i, t - 1] + [(t + 1, j + 1)] + P[t + 1, j - 1]
+            W[i, j] = min
+            
+    return {"Optimal_Result":W[0, n - 1], "Pairings":P[0, n - 1]}
 
 
