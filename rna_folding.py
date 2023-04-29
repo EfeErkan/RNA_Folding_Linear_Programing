@@ -228,9 +228,7 @@ def RNA_Folding_MIN_Energy_DP(RNA:str, distance_limit:int = 4): # Part F
             case2 = dp[i][j-1]
             best = min(case1, case2)
             for m in range(i+1, j):
-                case3 = dp[i][m-1] + dp[m+1][j-1]
-                if get_energy(RNA[m], RNA[j]) != 0:
-                    case3 += get_energy(RNA[m], RNA[j])
+                case3 = dp[i][m-1] + dp[m+1][j-1] + get_energy(RNA[m], RNA[j])
                 best = min(best, case3)
             dp[i][j] = best
     return dp[0][n-1]
