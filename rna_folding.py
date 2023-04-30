@@ -241,11 +241,11 @@ def RNA_Folding_MIN_Energy_DP(RNA:str, distance_limit:int = 4): # Part F
             
             for t in range(i, j - distance_limit + 1):
                 case = W[i, t - 1] + Energy(RNA[t], RNA[j]) + W[t + 1, j - 1]
+                if (t + 2, j) in P[t + 1, j - 1]:
+                    case += calculate_energy_pair(RNA, t + 1, j + 1)
                 if case < min:
                     min = case
                     P[i, j] = P[i, t - 1] + [(t + 1, j + 1)] + P[t + 1, j - 1]
             W[i, j] = min
             
     return {"Optimal_Result":W[0, n - 1], "Pairings":P[0, n - 1]}
-
-
