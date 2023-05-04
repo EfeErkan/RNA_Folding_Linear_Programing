@@ -1,3 +1,9 @@
+'''
+This Python file contains the Gurobi and Dynamic Programming Models
+
+Group No: 2
+Authors: Efe Erkan, Recep Uysal, Uygar Onat Erol
+'''
 from gurobipy import Model, GRB, quicksum, tupledict
 import gurobipy as gp
 import numpy as np

@@ -1,4 +1,9 @@
-import pandas as pd
+'''
+This Python file is for running each model
+
+Group No: 2
+Authors: Efe Erkan, Recep Uysal, Uygar Onat Erol
+'''
 import time
 from rna_folding import RNA_Folding_MAX_PAIRS, RNA_Folding_MIN_Energy, RNA_Folding_MIN_Stack_Energy, RNA_Folding_MIN_Stack_Energy_Pseudoknots, RNA_Folding_MIN_Energy_DP
 
